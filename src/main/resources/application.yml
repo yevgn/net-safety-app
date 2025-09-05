@@ -1,0 +1,35 @@
+spring:
+  application:
+    api-keys:
+      url-scan-io: 01991109-26cf-7747-aac9-dff88a5c7fc2
+    name: net-safety-app
+    jwt:
+      secret-key: 5bce874940fd82b367610fcf82bdd85e3a3d36959b4b65b273e5e2a60663f718
+      user-access-token-expiration: 86400000
+      user-refresh-token-expiration: 604800000
+      email-confirmation-token-expiration: 86400000
+      reset-2fa-token-expiration: 900000
+    uri:
+      confirm-registration: http://localhost:8080/net-safety-service/api/v1/users/confirm-email
+      confirm-2fa-secret-reset:  http://localhost:8080/net-safety-service/api/v1/auth/confirm-reset-2fa-secret
+    sender-email: yvgnantnv@yandex.ru
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/netsafetyapp
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+
+server:
+  port: 8080
+  servlet:
+    context-path: /net-safety-service/api/v1
+
