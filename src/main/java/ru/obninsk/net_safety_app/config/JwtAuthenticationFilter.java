@@ -16,8 +16,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import ru.obninsk.net_safety_app.entity.TokenMode;
+import ru.obninsk.net_safety_app.exception.UserNotActivatedException;
 import ru.obninsk.net_safety_app.repository.TokenRepository;
 import ru.obninsk.net_safety_app.service.TokenService;
+import ru.obninsk.net_safety_app.service.UserService;
 
 import java.io.IOException;
 
@@ -50,6 +52,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(
                         tokenService.extractUsername(jwt)
                 );
+
+                if(!userDetails.isEnabled()){
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()
                 );

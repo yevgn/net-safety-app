@@ -10,6 +10,5 @@ import org.springframework.http.HttpStatus;
 public class ApiError {
     private HttpStatus status;
     private String message;
-    private String debugMessage;
     private String error;
 }

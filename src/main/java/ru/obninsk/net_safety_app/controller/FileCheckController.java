@@ -17,6 +17,4 @@ public class FileCheckController {
     public ResponseEntity<FileCheckResponseDto> checkFile(@RequestParam("file") MultipartFile file){
         return ResponseEntity.ok(fileCheckService.checkFile(file));
     }
-
-
 }

@@ -5,12 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailSendException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import ru.obninsk.net_safety_app.dto.UserResponseDto;
-import ru.obninsk.net_safety_app.entity.User;
 
 import ru.obninsk.net_safety_app.service.UserService;
 
@@ -22,12 +21,12 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping("/send-confirmation-message")
-    public ResponseEntity<?> sendEmailConfirmationMessage(@AuthenticationPrincipal User user)
-            throws MailSendException, MailAuthenticationException, MessagingException {
-        userService.sendConfirmationMessage(user);
-        return ResponseEntity.ok().build();
-     }
+//    @GetMapping("/send-confirmation-message")
+//    public ResponseEntity<?> sendEmailConfirmationMessage(@AuthenticationPrincipal User user)
+//            throws MailSendException, MailAuthenticationException, MessagingException {
+//        userService.sendConfirmationMessage(user);
+//        return ResponseEntity.ok().build();
+//     }
 
     @GetMapping("/confirm-email")
     public ResponseEntity<?> confirmEmail(@RequestParam("user_email") String email, @RequestParam("token") String token)
@@ -54,5 +53,4 @@ public class UserController {
                 });
         return ResponseEntity.ok(raw);
     }
-
 }

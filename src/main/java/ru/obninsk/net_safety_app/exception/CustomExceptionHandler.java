@@ -3,7 +3,9 @@ package ru.obninsk.net_safety_app.exception;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.ServletException;
+import jakarta.validation.ConstraintDeclarationException;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -73,6 +75,43 @@ public class CustomExceptionHandler {
                 .error(ex.getMessage())
                 .build();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(UserNotActivatedException.class)
+    public ResponseEntity<ApiError> handleUserNotActivatedException(UserNotActivatedException ex){
+        log.info("Попытка доступа неактивированного пользователя:\n" + ex.getMessage());
+        ApiError error = ApiError
+                .builder()
+                .status(HttpStatus.FORBIDDEN)
+                .error(ex.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiError> handleConstraintViolationEx(ConstraintViolationException ex){
+        ApiError apiError = ApiError
+                .builder()
+                .status(HttpStatus.CONFLICT)
+                .error(List.of(ex.getSQLException().getMessage()).toString())
+                .build();
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(apiError);
+    }
+
+    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
+    public ResponseEntity<ApiErrorList> handleJakValidConstraintViolationEx(jakarta.validation.ConstraintViolationException ex){
+        List<String> errors = new ArrayList<>();
+
+        ex.getConstraintViolations().forEach(v -> {
+            errors.add(v.getMessage());
+        });
+
+        ApiErrorList apiError = ApiErrorList
+                .builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .errors(errors)
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
     }
 
     @ExceptionHandler(UserAlreadyRegisteredException.class)

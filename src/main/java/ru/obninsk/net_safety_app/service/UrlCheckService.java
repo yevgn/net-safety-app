@@ -25,7 +25,6 @@ public class UrlCheckService {
     private final UrlCheckResultService urlCheckResultService;
     private final VerdictService verdictService;
 
-
     public UrlCheckResponseDto checkUrl(UrlCheckRequestDto request, User user) throws InterruptedException {
         String url = request.getUrl();
         Optional<UrlCheckResult> resultOpt = urlCheckResultRepository.findByUrl(url);

@@ -33,8 +33,8 @@ public class AuthService {
     private final AuthenticationManager authManager;
     private final EmailService emailService;
 
-    @Transactional
-    public AuthResponseDto register(RegistrationRequestDto request) {
+    @Transactional(rollbackFor = Exception.class)
+    public AuthResponseDto register(RegistrationRequestDto request) throws MessagingException {
         if (userService.findByEmail(request.getEmail()).isPresent()) {
             throw new UserAlreadyRegisteredException(
                     String.format("Пользователь с таким email уже зарегистрирован: %s", request.getEmail())
@@ -55,6 +55,7 @@ public class AuthService {
         }
 
         userService.save(user);
+        userService.sendConfirmationMessage(user);
 
         String accessToken = tokenService.generateUserToken(List.of(Role.USER.name()), user.getEmail(), TokenMode.ACCESS);
         String refreshToken = tokenService.generateUserToken(List.of(Role.USER.name()), user.getEmail(), TokenMode.REFRESH);
@@ -86,6 +87,12 @@ public class AuthService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("Пользователь с email %s не найден", request.getEmail())
                 ));
+
+        if(!user.isActivated()){
+            throw new UserNotActivatedException(
+                    String.format("Пользователь %s не подтвердил адрес эл. почты", user.getEmail())
+            );
+        }
 
         if (user.is2faEnabled()) {
             return AuthResponseDto.builder()
@@ -182,7 +189,7 @@ public class AuthService {
         emailService.send2faResetUriMessage(user);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void confirm2faSecretReset(String email, String token)
             throws MailSendException, MailAuthenticationException, MessagingException {
         User user = userService.findByEmail(email)
