@@ -47,10 +47,6 @@ public class ServiceClient {
 
     private final String checkPasswordStrengthOnStytch = "https://test.stytch.com/v1/passwords/strength_check";
 
-    private final String yandexFolderId = "b1gmanoea45t35rgi7g4";
-    private final String yandexApiKeyId = "ajenr8npm571la1jtd79";
-    private final String yandexApiKey = "AQVN19ovmxThqoM-tOlDZGCc-Pfa99ypl-cPnIqY";
-
     public String scanUrlOnUrlScanIo(String url){
         try {
             RestTemplate restTemplate = new RestTemplate();
