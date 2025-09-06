@@ -13,17 +13,17 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import ru.obninsk.net_safety_app.dto.PasswordCheckResponseDto;
 import ru.obninsk.net_safety_app.dto.UrlScanIoResultDto;
 import ru.obninsk.net_safety_app.dto.VirusTotalResultDto;
+import ru.obninsk.net_safety_app.entity.PasswordCategory;
 import ru.obninsk.net_safety_app.exception.InternalServerErrorException;
 import ru.obninsk.net_safety_app.exception.InvalidArgumentException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +31,8 @@ import java.util.Map;
 public class ServiceClient {
     private final String urlScanIoApiKey = "01991109-26cf-7747-aac9-dff88a5c7fc2";
     private final String virusTotalApiKey = "e6ee051ceaa10a48a69472dfdd5463e4a5d6e4230f8ed389fc8527e3cfca590d";
+    private final String stytchProjectId = "project-test-e07e47f7-1df6-43e7-bdc0-d834e740381e";
+    private final String stytchApiKey = "secret-test-wnSY7pD4jC5tYMRozB8GtpE0RI7Q5xYm-Qs=";
 
     private final String scanUrlOnUrlScanIo = "https://urlscan.io/api/v1/scan";
     private final String getResultOnUrlScanIo = "https://urlscan.io/api/v1/result/{scanId}/";
@@ -43,6 +45,11 @@ public class ServiceClient {
     private final String scanUrlOnVirusTotal = "https://www.virustotal.com/api/v3/urls";
     private final String getAnalysisFromVirusTotal = "https://www.virustotal.com/api/v3/analyses/{analysisId}";
 
+    private final String checkPasswordStrengthOnStytch = "https://test.stytch.com/v1/passwords/strength_check";
+
+    private final String yandexFolderId = "b1gmanoea45t35rgi7g4";
+    private final String yandexApiKeyId = "ajenr8npm571la1jtd79";
+    private final String yandexApiKey = "AQVN19ovmxThqoM-tOlDZGCc-Pfa99ypl-cPnIqY";
 
     public String scanUrlOnUrlScanIo(String url){
         try {
@@ -342,6 +349,68 @@ public class ServiceClient {
     }
 
     @SuppressWarnings("unchecked")
+    public PasswordCheckResponseDto checkPasswordStrength(String password) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("password", password);
+
+            String auth = stytchProjectId + ":" + stytchApiKey;
+            String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+
+            MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+            headers.set("content-type", "application/json");
+            headers.set("Authorization", "Basic " + encodedAuth);
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<Map> response = restTemplate.postForEntity(checkPasswordStrengthOnStytch, request, Map.class);
+
+            if(!response.getStatusCode().is2xxSuccessful()){
+                throw new InternalServerErrorException("Ошибка на сервере");
+            }
+
+            Map<String, Object> body = response.getBody();
+            if (body == null) {
+                throw new InternalServerErrorException("Пустой ответ от Stytch");
+            }
+
+            Boolean isLeaked = (Boolean) body.get("breached_password");
+            Integer score = (Integer) body.get("score");
+
+            PasswordCategory category;
+            if(score == null){
+                category = PasswordCategory.UNKNOWN;
+            } else {
+                category = switch (score) {
+                    case 0 -> PasswordCategory.TOO_WEAK;
+                    case 1 -> PasswordCategory.TOO_WEAK;
+                    case 2 -> PasswordCategory.WEAK;
+                    case 3 -> PasswordCategory.NORMAL;
+                    case 4 -> PasswordCategory.STRONG;
+                    default -> PasswordCategory.UNKNOWN;
+                };
+            }
+
+            Map<String, Object> feedback = (Map<String, Object>) body.get("feedback");
+            List<String> suggestions = feedback == null ? List.of() : (List<String>) feedback.get("suggestions");
+
+            return PasswordCheckResponseDto
+                    .builder()
+                    .password(password)
+                    .isLeaked(isLeaked)
+                    .passwordCategory(category)
+                    .suggestions(suggestions)
+                    .build();
+
+        } catch (HttpClientErrorException ex){
+            throw new InvalidArgumentException(ex.getMessage());
+        } catch (HttpServerErrorException ex){
+            throw new InternalServerErrorException(ex.getMessage());
+        }
+    }
+
     public String scanFile(MultipartFile file, String largeFileCheckUrl) {
         try {
             RestTemplate restTemplate = new RestTemplate();
@@ -384,6 +453,10 @@ public class ServiceClient {
             throw new InternalServerErrorException(ex.getMessage());
         }
     }
+//
+//    public List<String> translateToRussian(List<String> suggestions) {
+//
+//    }
 
     private static class MultipartInputStreamFileResource extends InputStreamResource {
 

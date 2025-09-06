@@ -12,7 +12,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "phishing_check_results",
+@Table(name = "url_check_results",
         uniqueConstraints = @UniqueConstraint(columnNames = {"url"}))
 public class UrlCheckResult {
     @Id

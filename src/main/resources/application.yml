@@ -32,4 +32,3 @@ server:
   port: 8080
   servlet:
     context-path: /net-safety-service/api/v1
-

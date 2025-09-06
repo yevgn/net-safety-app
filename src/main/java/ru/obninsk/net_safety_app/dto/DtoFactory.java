@@ -1,5 +1,6 @@
 package ru.obninsk.net_safety_app.dto;
 
+import ru.obninsk.net_safety_app.entity.PasswordCheckResult;
 import ru.obninsk.net_safety_app.entity.ResultCategory;
 import ru.obninsk.net_safety_app.entity.UrlCheckResult;
 import ru.obninsk.net_safety_app.entity.User;
@@ -60,6 +61,16 @@ public class DtoFactory {
                 .userInfo(
                         result.isPublic() ? result.getUser().getName() + " " + result.getUser().getSurname() : null
                 )
+                .build();
+    }
+
+    public static PasswordCheckResponseDto makePasswordCheckResponseDto(PasswordCheckResult passwordCheckResult) {
+        return PasswordCheckResponseDto
+                .builder()
+                .password(passwordCheckResult.getPassword())
+                .passwordCategory(passwordCheckResult.getCategory())
+                .isLeaked(passwordCheckResult.isLeaked())
+                .suggestions(passwordCheckResult.getSuggestions())
                 .build();
     }
 }
