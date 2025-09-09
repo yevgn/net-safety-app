@@ -31,7 +31,7 @@
 
 2. **Перейдите в директорию проекта:**
     ```bash
-    cd netsafetyapp
+    cd net-safety-app
     ```
 
 3. **Соберите контейнеры с помощью Docker Compose и запустите их:**
