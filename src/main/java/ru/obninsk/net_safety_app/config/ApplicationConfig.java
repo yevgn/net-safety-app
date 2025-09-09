@@ -1,6 +1,7 @@
 package ru.obninsk.net_safety_app.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,7 +19,6 @@ import ru.obninsk.net_safety_app.repository.UserRepository;
 
 import java.util.Properties;
 
-
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {
@@ -31,6 +31,8 @@ public class ApplicationConfig {
                         String.format("Пользователь с email %s не найден", username)
                 ));
     }
+
+
 
     @Bean
     public AuthenticationProvider authenticationProvider() {

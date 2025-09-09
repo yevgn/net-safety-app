@@ -2,9 +2,11 @@ package ru.obninsk.net_safety_app.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -13,9 +15,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-import ru.obninsk.net_safety_app.dto.PasswordCheckResponseDto;
-import ru.obninsk.net_safety_app.dto.UrlScanIoResultDto;
-import ru.obninsk.net_safety_app.dto.VirusTotalResultDto;
+import ru.obninsk.net_safety_app.dto.*;
 import ru.obninsk.net_safety_app.entity.PasswordCategory;
 import ru.obninsk.net_safety_app.exception.InternalServerErrorException;
 import ru.obninsk.net_safety_app.exception.InvalidArgumentException;
@@ -33,6 +33,7 @@ public class ServiceClient {
     private final String virusTotalApiKey = "e6ee051ceaa10a48a69472dfdd5463e4a5d6e4230f8ed389fc8527e3cfca590d";
     private final String stytchProjectId = "project-test-e07e47f7-1df6-43e7-bdc0-d834e740381e";
     private final String stytchApiKey = "secret-test-wnSY7pD4jC5tYMRozB8GtpE0RI7Q5xYm-Qs=";
+    private final String gigachatApiKey = "NTVjZjg5ODAtNmI5OS00ZjRkLTk4MjctNjI2Mjk4YzVkN2QyOmE3MjQ0Nzk4LTIxYzAtNDE3ZS05MzNjLWU0Y2VjOTliODgyYQ==";
 
     private final String scanUrlOnUrlScanIo = "https://urlscan.io/api/v1/scan";
     private final String getResultOnUrlScanIo = "https://urlscan.io/api/v1/result/{scanId}/";
@@ -46,6 +47,9 @@ public class ServiceClient {
     private final String getAnalysisFromVirusTotal = "https://www.virustotal.com/api/v3/analyses/{analysisId}";
 
     private final String checkPasswordStrengthOnStytch = "https://test.stytch.com/v1/passwords/strength_check";
+
+    private final String getAccessTokenForGigaChat = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth";
+    private final String getResponseFromGigaChat = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions";
 
     public String scanUrlOnUrlScanIo(String url){
         try {
@@ -453,6 +457,90 @@ public class ServiceClient {
 //    public List<String> translateToRussian(List<String> suggestions) {
 //
 //    }
+
+    @SuppressWarnings("unchecked")
+    public GigaChatResponseDto getResponseFromGigaChat(GigaChatRequestDto prompt, String jwt){
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("model", prompt.getModel());
+            requestBody.put("messages", prompt.getMessages());
+
+            MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+            headers.set("content-type", "application/json");
+            headers.set("Authorization", "Bearer  " + jwt);
+            headers.set("accept", "application/json");
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<Map> response = restTemplate.postForEntity(getResponseFromGigaChat, request, Map.class);
+
+            if(!response.getStatusCode().is2xxSuccessful()){
+                throw new InternalServerErrorException("Ошибка на сервере");
+            }
+
+            Map<String, Object> body = response.getBody();
+            if (body == null) {
+                throw new InternalServerErrorException("Пустой ответ от giga chat");
+            }
+
+            List<Map<String, Object>> choices = body.containsKey("choices") ? (List<Map<String, Object>>) body.get("choices") : null;
+            Map<String, Object> choice = choices != null ? choices.get(0) : null;
+            Map<String, Object> message = choice != null ? (Map<String, Object>) choice.get("message") : null;
+
+            return GigaChatResponseDto
+                    .builder()
+                    .isAuthPassed(true)
+                    .content(message != null ? (String) message.get("content") : "")
+                    .build();
+
+        } catch (HttpClientErrorException ex){
+            if(ex.getStatusCode() == HttpStatus.UNAUTHORIZED){
+                return GigaChatResponseDto
+                        .builder()
+                        .content("")
+                        .isAuthPassed(false)
+                        .build();
+            }
+            throw new InternalServerErrorException(ex.getMessage());
+        } catch (HttpServerErrorException ex){
+            throw new InternalServerErrorException(ex.getMessage());
+        }
+    }
+
+    public String getAccessTokenFromGigaChat(){
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+            requestBody.add("scope", "GIGACHAT_API_PERS");
+
+            MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+            headers.set("Content-Type","application/x-www-form-urlencoded");
+            headers.set("RqUID", "fd035743-6351-435d-8b3f-8bd1d2087c31");
+            headers.set("Accept", "application/json");
+            headers.set("Authorization", "Basic " + gigachatApiKey);
+
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<Map> response = restTemplate.postForEntity(getAccessTokenForGigaChat, request, Map.class);
+
+            if(!response.getStatusCode().is2xxSuccessful()){
+                throw new InternalServerErrorException("Ошибка на сервере");
+            }
+
+            Map<String, Object> body = response.getBody();
+            if (body == null || !body.containsKey("access_token")) {
+                throw new InternalServerErrorException("Пустой ответ от giga chat api");
+            }
+
+            return (String) body.get("access_token");
+
+        } catch (HttpClientErrorException | HttpServerErrorException ex){
+            throw new InternalServerErrorException(ex.getMessage());
+        }
+    }
 
     private static class MultipartInputStreamFileResource extends InputStreamResource {
 

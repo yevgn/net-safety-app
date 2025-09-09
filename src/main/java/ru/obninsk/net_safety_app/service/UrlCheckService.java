@@ -1,7 +1,5 @@
 package ru.obninsk.net_safety_app.service;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,7 +40,7 @@ public class UrlCheckService {
                 screenshot = serviceClient.getScreenshotFromUrlScanIo(scanId);
             } catch (Exception ex) {
                 String urlScanIoScanUuid = serviceClient.scanUrlOnUrlScanIo(url);
-                Thread.sleep(15000L);
+                Thread.sleep(20000L);
                 UrlScanIoResultDto urlScanIoResult = serviceClient.getScanResultFromUrlScanIo(urlScanIoScanUuid);
                 entity.setScreenshotUrl(urlScanIoResult.getScreenshotUrl());
                 screenshot = serviceClient.getScreenshotFromUrlScanIo(urlScanIoScanUuid);
@@ -50,11 +48,12 @@ public class UrlCheckService {
 
         } else {
             String urlScanIoScanUuid = serviceClient.scanUrlOnUrlScanIo(url);
-            Thread.sleep(15000L);
+            Thread.sleep(20000L);
             UrlScanIoResultDto urlScanIoResult = serviceClient.getScanResultFromUrlScanIo(urlScanIoScanUuid);
             screenshot = serviceClient.getScreenshotFromUrlScanIo(urlScanIoScanUuid);
 
             String analysisId = serviceClient.scanUrlOnVirusTotal(url);
+            Thread.sleep(10000L);
             VirusTotalResultDto virusTotalResult = serviceClient.getAnalysisFromVirusTotal(analysisId);
 
             List<String> categories = Stream.concat(

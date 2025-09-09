@@ -1,5 +1,6 @@
 package ru.obninsk.net_safety_app.controller;
 
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -22,16 +23,36 @@ import ru.obninsk.net_safety_app.service.UrlCheckService;
 @RequestMapping("/urlcheck")
 @RequiredArgsConstructor
 @Validated
+//@Tag(
+//        name = "Контроллер для проверки ссылок на веб-ресурсы"
+//)
 public class UrlCheckController {
     private final UrlCheckResultService urlCheckResultService;
     private final UrlCheckService urlCheckService;
 
+
+//    @Operation(
+//            summary = "Проверка ссылки на веб-ресурс",
+//            description = "Ссылка проверяется на фишинг, сайт, на который ведет ссылка - на содержание вредоносных ресурсов." +
+//                    "Вместо с вердиктом пользователь получает скриншот сайта, на который ведет ссылка"
+//    )
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "400", description = "Ссылка отсутствует"),
+//            @ApiResponse(responseCode = "200", description = "ОК")
+//    })
     @PostMapping("/check-url")
     public ResponseEntity<UrlCheckResponseDto> checkUrl(
             @Valid @RequestBody UrlCheckRequestDto request, @AuthenticationPrincipal User user) throws InterruptedException {
         return ResponseEntity.ok(urlCheckService.checkUrl(request, user));
     }
 
+//    @Operation(
+//            summary = "Получение сохраненных ссылок"
+//    )
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "400", description = "Некорректные данные"),
+//            @ApiResponse(responseCode = "200", description = "ОК")
+//    })
     @GetMapping("/checked-url-list")
     public ResponseEntity<PageResponseDto<UrlCheckShortResponseDto>> findUrlCheckResults(
             @Min(value = 0, message = "Минимальное значение offset - 0")

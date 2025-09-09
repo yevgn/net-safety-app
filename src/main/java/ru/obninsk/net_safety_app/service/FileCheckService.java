@@ -20,7 +20,7 @@ public class FileCheckService {
     private final ServiceClient serviceClient;
     private final VerdictService verdictService;
 
-    public FileCheckResponseDto checkFile(MultipartFile file) {
+    public FileCheckResponseDto checkFile(MultipartFile file) throws InterruptedException {
         double sizeInMb = file.getSize()/(1024.0 * 1024.0);
 
         if(sizeInMb>= 200){
@@ -31,8 +31,10 @@ public class FileCheckService {
 
         String analysisId = serviceClient
                 .scanFile(file, sizeInMb >= 32 ? serviceClient.getUrlForLargeFileCheck() : "");
+        Thread.sleep(10000L);
 
         VirusTotalResultDto checkResult = serviceClient.getAnalysisFromVirusTotal(analysisId);
+
 
         List<String> categories = checkResult.getEnginesVerdicts().values().stream().map(o -> (String) o).toList();
 

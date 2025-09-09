@@ -19,6 +19,14 @@ public enum Role {
                     Permission.UPDATE,
                     Permission.DELETE
             )
+    ),
+    SERVICE (
+            List.of(
+                    Permission.CREATE,
+            Permission.READ,
+            Permission.UPDATE,
+            Permission.DELETE
+            )
     )
 
     ;

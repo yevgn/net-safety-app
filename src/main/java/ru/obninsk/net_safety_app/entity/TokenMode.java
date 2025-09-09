@@ -4,6 +4,6 @@ public enum TokenMode {
     ACCESS,
     REFRESH,
     EMAIL_CONFIRMATION,
-    RESET_2FA
+    RESET_2FA,
     ;
 }

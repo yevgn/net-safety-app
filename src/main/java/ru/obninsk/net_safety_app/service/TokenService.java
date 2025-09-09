@@ -154,6 +154,8 @@ public class TokenService {
         return tokenRepository.findUserByToken(token);
     }
 
+
+
     public Token saveToken(String token, TokenType tokenType, TokenMode tokenMode, User user) {
         Token tokenEntity = Token.builder()
                 .token(token)
@@ -166,6 +168,10 @@ public class TokenService {
 
     public int revokeUserTokensByTokenModeIn(String email, List<TokenMode> modes){
         return tokenRepository.revokeAllUsersTokensByTokenModeIn(email, modes);
+    }
+
+    List<Token> findByUserEmailNotRevokedAndExpired(String userEmail){
+        return tokenRepository.findByUserEmailNotRevokedAndNotExpired(userEmail);
     }
 
 //    public int revokeAllUserTokens(String email){

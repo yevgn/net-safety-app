@@ -33,4 +33,11 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
     @Query(value = "UPDATE Token SET revoked = true, expired = true" +
             " WHERE user.email = :email AND tokenMode IN :modes")
     int revokeAllUsersTokensByTokenModeIn(@Param("email") String email, @Param("modes") List<TokenMode> modes);
+
+    @Query("""
+            SELECT t FROM Token t WHERE t.user.email = :user_email
+            AND t.revoked = false AND t.expired = false
+            """)
+    List<Token> findByUserEmailNotRevokedAndNotExpired(@Param("user_email") String userEmail);
+
 }

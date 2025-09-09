@@ -2,7 +2,7 @@ package ru.obninsk.net_safety_app.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.stereotype.Service;
 import ru.obninsk.net_safety_app.entity.PasswordCheckResult;
 import ru.obninsk.net_safety_app.repository.PasswordCheckResultRepository;
