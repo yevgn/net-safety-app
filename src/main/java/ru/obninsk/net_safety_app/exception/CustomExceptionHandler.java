@@ -141,24 +141,24 @@ public class CustomExceptionHandler {
         return ResponseEntity.badRequest().body(error);
     }
 
-    @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ApiErrorList> handleHandlerMethodValidationEx(HandlerMethodValidationException ex) {
-        log.info( ex.getMessage());
-        List<String> errors = new ArrayList<>();
-
-        ex.getParameterValidationResults().forEach(validationRes ->
-                validationRes.getResolvableErrors().forEach( error ->
-                        errors.add(error.getDefaultMessage())
-                ));
-
-        ApiErrorList error = ApiErrorList
-                .builder()
-                .status(HttpStatus.BAD_REQUEST)
-                .errors(errors)
-                .build();
-
-        return ResponseEntity.badRequest().body(error);
-    }
+//    @ExceptionHandler(HandlerMethodValidationException.class)
+//    public ResponseEntity<ApiErrorList> handleHandlerMethodValidationEx(HandlerMethodValidationException ex) {
+//        log.info( ex.getMessage());
+//        List<String> errors = new ArrayList<>();
+//
+//        ex.getParameterValidationResults().forEach(validationRes ->
+//                validationRes.getResolvableErrors().forEach( error ->
+//                        errors.add(error.getDefaultMessage())
+//                ));
+//
+//        ApiErrorList error = ApiErrorList
+//                .builder()
+//                .status(HttpStatus.BAD_REQUEST)
+//                .errors(errors)
+//                .build();
+//
+//        return ResponseEntity.badRequest().body(error);
+//    }
 
     @ExceptionHandler({ InternalServerErrorException.class, Qr2faGenerationException.class,
             ServletException.class, IOException.class})

@@ -1,6 +1,10 @@
 package ru.obninsk.net_safety_app.controller;
 
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,19 +16,19 @@ import ru.obninsk.net_safety_app.service.PasswordCheckService;
 @RestController
 @RequestMapping("/passwordcheck")
 @RequiredArgsConstructor
-//@Tag(
-//        name = "Контроллер для проверки паролей"
-//)
+@Tag(
+        name = "Контроллер для проверки паролей"
+)
 public class PasswordCheckController {
     private final PasswordCheckService passwordCheckService;
 
-//    @Operation(
-//            summary = "Проверка надежности пароля"
-//    )
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "400", description = "Пароль отсутствует"),
-//            @ApiResponse(responseCode = "200", description = "ОК")
-//    })
+    @Operation(
+            summary = "Проверка надежности пароля"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "400", description = "Пароль отсутствует"),
+            @ApiResponse(responseCode = "200", description = "ОК")
+    })
     @PostMapping("/check-password-strength")
     public ResponseEntity<PasswordCheckResponseDto> checkPasswordStrength(
             @Valid @RequestBody PasswordCheckRequestDto request){

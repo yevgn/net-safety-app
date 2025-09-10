@@ -1,6 +1,5 @@
 package ru.obninsk.net_safety_app.service;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,10 +30,8 @@ public class FileCheckService {
 
         String analysisId = serviceClient
                 .scanFile(file, sizeInMb >= 32 ? serviceClient.getUrlForLargeFileCheck() : "");
-        Thread.sleep(10000L);
-
+        Thread.sleep(20000L);
         VirusTotalResultDto checkResult = serviceClient.getAnalysisFromVirusTotal(analysisId);
-
 
         List<String> categories = checkResult.getEnginesVerdicts().values().stream().map(o -> (String) o).toList();
 

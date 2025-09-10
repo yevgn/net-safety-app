@@ -53,7 +53,7 @@ public class UrlCheckService {
             screenshot = serviceClient.getScreenshotFromUrlScanIo(urlScanIoScanUuid);
 
             String analysisId = serviceClient.scanUrlOnVirusTotal(url);
-            Thread.sleep(10000L);
+            Thread.sleep(15000L);
             VirusTotalResultDto virusTotalResult = serviceClient.getAnalysisFromVirusTotal(analysisId);
 
             List<String> categories = Stream.concat(
